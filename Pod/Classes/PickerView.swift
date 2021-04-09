@@ -622,6 +622,20 @@ extension PickerView: UITableViewDelegate {
         return rowHeight
     }
     
+    public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//        let layer = cell.contentView.layer
+//        var rotationAndPerspectiveTransform:CATransform3D = CATransform3DIdentity
+//        rotationAndPerspectiveTransform.m34 = 1.0 / -1000;
+//
+//        rotationAndPerspectiveTransform = CATransform3DRotate(rotationAndPerspectiveTransform, -.pi*0.5, 1.0, 0.0, 0.0);
+//        //let scaleTransform = CATransform3DScale(CATransform3DIdentity, 0, 0, 0)
+//
+//        layer.transform =  rotationAndPerspectiveTransform
+//
+//        UIView.animate(withDuration: 3) {
+//            layer.transform = CATransform3DIdentity
+//        }
+    }
 }
 
 extension PickerView: UIScrollViewDelegate {
@@ -659,11 +673,14 @@ extension PickerView: UIScrollViewDelegate {
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let visibleRect = CGRect(origin: scrollView.contentOffset, size: scrollView.frame.size)
+        
         let partialRow = Float(scrollView.contentOffset.y / rowHeight)
-        let roundedRow = Int(lroundf(partialRow))
+        let roundedRow = lroundf(partialRow)
         
         // Avoid to have two highlighted rows at the same time
         if let visibleRows = tableView.indexPathsForVisibleRows {
+            //debugPrint(visibleRows)
             for indexPath in visibleRows {
                 if let cellToUnhighlight = tableView.cellForRow(at: indexPath) as? SimplePickerTableViewCell , (indexPath as NSIndexPath).row != roundedRow {
                     let _ = delegate?.pickerView?(self, viewForRow: indexForRow((indexPath as NSIndexPath).row), highlighted: false, reusingView: cellToUnhighlight.customView)
@@ -676,6 +693,20 @@ extension PickerView: UIScrollViewDelegate {
         if let cellToHighlight = tableView.cellForRow(at: IndexPath(row: roundedRow, section: 0)) as? SimplePickerTableViewCell {
             let _ = delegate?.pickerView?(self, viewForRow: indexForRow(roundedRow), highlighted: true, reusingView: cellToHighlight.customView)
             let _ = delegate?.pickerView?(self, styleForLabel: cellToHighlight.titleLabel, highlighted: true)
+        }
+        
+        tableView.visibleCells.forEach { (cell) in
+            let percentFromCenter = min(((visibleRect.midY - cell.frame.midY) / (visibleRect.height / 2)), 1.0)
+            
+            let layer = cell.contentView.layer
+            var rotationAndPerspectiveTransform:CATransform3D = CATransform3DIdentity
+            rotationAndPerspectiveTransform.m34 = 1.0 / -1000;
+            
+            let maxRotation = CGFloat.pi / 2
+            rotationAndPerspectiveTransform = CATransform3DRotate(rotationAndPerspectiveTransform,maxRotation * percentFromCenter, 1.0, 0.0, 0.0);
+            //let scaleTransform = CATransform3DScale(CATransform3DIdentity, 0, 0, 0)
+            
+            layer.transform =  rotationAndPerspectiveTransform
         }
     }
     
