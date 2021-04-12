@@ -55,33 +55,33 @@ open class PickerView: UIView {
     }
     
     /**
-        ScrollingStyle Enum.
-    
-        - parameter Default: Show only the number of rows informed in data source.
-    
-        - parameter Infinite: Loop through the data source offering a infinite scrolling experience to the user.
-    */
+     ScrollingStyle Enum.
+     
+     - parameter Default: Show only the number of rows informed in data source.
+     
+     - parameter Infinite: Loop through the data source offering a infinite scrolling experience to the user.
+     */
     
     @objc public enum ScrollingStyle: Int {
         case `default`, infinite
     }
     
     /**
-        SelectionStyle Enum.
-    
-        - parameter None: Don't uses any aditional view to highlight the selection, only the label style customization provided by delegate.
-    
-        - parameter DefaultIndicator: Provide a simple selection indicator on the bottom of the highlighted row with full width and 2pt of height.
-                                  The default color is its superview `tintColor` but you have free access to customize the DefaultIndicator through the `defaultSelectionIndicator` property.
-    
-        - parameter Overlay: Provide a full width and height (the height you provided on delegate) view that overlay the highlighted row.
-                         The default color is its superview `tintColor` and the alpha is set to 0.25, but you have free access to customize it through the `selectionOverlay` property.
-                         Tip: You can set the alpha to 1.0 and background color to .clearColor() and add your custom selection view to make it looks as you want 
-                         (don't forget to properly add the constraints related to `selectionOverlay` to keep your experience with any screen size).
-    
-        - parameter Image: Provide a full width and height image view selection indicator (the height you provided on delegate) without any image.
-                       You must have a selection indicator as a image and set it to the image view through the `selectionImageView` property.
-    */
+     SelectionStyle Enum.
+     
+     - parameter None: Don't uses any aditional view to highlight the selection, only the label style customization provided by delegate.
+     
+     - parameter DefaultIndicator: Provide a simple selection indicator on the bottom of the highlighted row with full width and 2pt of height.
+     The default color is its superview `tintColor` but you have free access to customize the DefaultIndicator through the `defaultSelectionIndicator` property.
+     
+     - parameter Overlay: Provide a full width and height (the height you provided on delegate) view that overlay the highlighted row.
+     The default color is its superview `tintColor` and the alpha is set to 0.25, but you have free access to customize it through the `selectionOverlay` property.
+     Tip: You can set the alpha to 1.0 and background color to .clearColor() and add your custom selection view to make it looks as you want
+     (don't forget to properly add the constraints related to `selectionOverlay` to keep your experience with any screen size).
+     
+     - parameter Image: Provide a full width and height image view selection indicator (the height you provided on delegate) without any image.
+     You must have a selection indicator as a image and set it to the image view through the `selectionImageView` property.
+     */
     
     @objc public enum SelectionStyle: Int {
         case none, defaultIndicator, overlay, image
@@ -109,7 +109,7 @@ open class PickerView: UIView {
             return dataSource?.pickerViewNumberOfRows(self) ?? 0
         }
     }
-
+    
     fileprivate var indexesByDataSource: Int {
         get {
             return numberOfRowsByDataSource > 0 ? numberOfRowsByDataSource - 1 : numberOfRowsByDataSource
@@ -178,6 +178,7 @@ open class PickerView: UIView {
     fileprivate var isScrolling = false
     fileprivate var setupHasBeenDone = false
     fileprivate var shouldSelectNearbyToMiddleRow = true
+    fileprivate var wasScrolling = false
     
     open var scrollingStyle = ScrollingStyle.default {
         didSet {
@@ -247,30 +248,30 @@ open class PickerView: UIView {
         addSubview(tableView)
         
         let tableViewH = NSLayoutConstraint(item: tableView, attribute: .height, relatedBy: .equal, toItem: self,
-                                                attribute: .height, multiplier: 1, constant: 0)
+                                            attribute: .height, multiplier: 1, constant: 0)
         addConstraint(tableViewH)
         
         let tableViewW = NSLayoutConstraint(item: tableView, attribute: .width, relatedBy: .equal, toItem: self,
-                                                attribute: .width, multiplier: 1, constant: 0)
+                                            attribute: .width, multiplier: 1, constant: 0)
         addConstraint(tableViewW)
         
         let tableViewL = NSLayoutConstraint(item: tableView, attribute: .leading, relatedBy: .equal, toItem: self,
-                                                attribute: .leading, multiplier: 1, constant: 0)
+                                            attribute: .leading, multiplier: 1, constant: 0)
         addConstraint(tableViewL)
         
         let tableViewTop = NSLayoutConstraint(item: tableView, attribute: .top, relatedBy: .equal, toItem: self,
-                                                attribute: .top, multiplier: 1, constant: 0)
+                                              attribute: .top, multiplier: 1, constant: 0)
         addConstraint(tableViewTop)
         
         let tableViewBottom = NSLayoutConstraint(item: tableView, attribute: .bottom, relatedBy: .equal, toItem: self,
-                                                    attribute: .bottom, multiplier: 1, constant: 0)
+                                                 attribute: .bottom, multiplier: 1, constant: 0)
         addConstraint(tableViewBottom)
         
         let tableViewT = NSLayoutConstraint(item: tableView, attribute: .trailing, relatedBy: .equal, toItem: self,
-                                                attribute: .trailing, multiplier: 1, constant: 0)
+                                            attribute: .trailing, multiplier: 1, constant: 0)
         addConstraint(tableViewT)
     }
-
+    
     fileprivate func setupSelectionViewsVisibility() {
         switch selectionStyle {
         case .defaultIndicator:
@@ -298,23 +299,23 @@ open class PickerView: UIView {
         self.addSubview(selectionOverlay)
         
         selectionOverlayH = NSLayoutConstraint(item: selectionOverlay, attribute: .height, relatedBy: .equal, toItem: nil,
-                                                attribute: .notAnAttribute, multiplier: 1, constant: rowHeight)
+                                               attribute: .notAnAttribute, multiplier: 1, constant: rowHeight)
         self.addConstraint(selectionOverlayH)
         
         let selectionOverlayW = NSLayoutConstraint(item: selectionOverlay, attribute: .width, relatedBy: .equal, toItem: self,
-                                                    attribute: .width, multiplier: 1, constant: 0)
+                                                   attribute: .width, multiplier: 1, constant: 0)
         addConstraint(selectionOverlayW)
         
         let selectionOverlayL = NSLayoutConstraint(item: selectionOverlay, attribute: .leading, relatedBy: .equal, toItem: self,
-                                                    attribute: .leading, multiplier: 1, constant: 0)
+                                                   attribute: .leading, multiplier: 1, constant: 0)
         addConstraint(selectionOverlayL)
         
         let selectionOverlayT = NSLayoutConstraint(item: selectionOverlay, attribute: .trailing, relatedBy: .equal, toItem: self,
-                                                    attribute: .trailing, multiplier: 1, constant: 0)
+                                                   attribute: .trailing, multiplier: 1, constant: 0)
         addConstraint(selectionOverlayT)
         
         let selectionOverlayY = NSLayoutConstraint(item: selectionOverlay, attribute: .centerY, relatedBy: .equal, toItem: self,
-                                                    attribute: .centerY, multiplier: 1, constant: 0)
+                                                   attribute: .centerY, multiplier: 1, constant: 0)
         addConstraint(selectionOverlayY)
     }
     
@@ -324,23 +325,23 @@ open class PickerView: UIView {
         self.addSubview(selectionImageView)
         
         selectionImageH = NSLayoutConstraint(item: selectionImageView, attribute: .height, relatedBy: .equal, toItem: nil,
-                                                attribute: .notAnAttribute, multiplier: 1, constant: rowHeight)
+                                             attribute: .notAnAttribute, multiplier: 1, constant: rowHeight)
         self.addConstraint(selectionImageH)
         
         let selectionImageW = NSLayoutConstraint(item: selectionImageView, attribute: .width, relatedBy: .equal, toItem: self,
-                                                    attribute: .width, multiplier: 1, constant: 0)
+                                                 attribute: .width, multiplier: 1, constant: 0)
         addConstraint(selectionImageW)
         
         let selectionImageL = NSLayoutConstraint(item: selectionImageView, attribute: .leading, relatedBy: .equal, toItem: self,
-                                                    attribute: .leading, multiplier: 1, constant: 0)
+                                                 attribute: .leading, multiplier: 1, constant: 0)
         addConstraint(selectionImageL)
         
         let selectionImageT = NSLayoutConstraint(item: selectionImageView, attribute: .trailing, relatedBy: .equal, toItem: self,
-                                                    attribute: .trailing, multiplier: 1, constant: 0)
+                                                 attribute: .trailing, multiplier: 1, constant: 0)
         addConstraint(selectionImageT)
         
         let selectionImageY = NSLayoutConstraint(item: selectionImageView, attribute: .centerY, relatedBy: .equal, toItem: self,
-                                                    attribute: .centerY, multiplier: 1, constant: 0)
+                                                 attribute: .centerY, multiplier: 1, constant: 0)
         addConstraint(selectionImageY)
     }
     
@@ -349,23 +350,23 @@ open class PickerView: UIView {
         addSubview(defaultSelectionIndicator)
         
         let selectionIndicatorH = NSLayoutConstraint(item: defaultSelectionIndicator, attribute: .height, relatedBy: .equal, toItem: nil,
-                                                        attribute: .notAnAttribute, multiplier: 1, constant: 2.0)
+                                                     attribute: .notAnAttribute, multiplier: 1, constant: 2.0)
         addConstraint(selectionIndicatorH)
         
         let selectionIndicatorW = NSLayoutConstraint(item: defaultSelectionIndicator, attribute: .width, relatedBy: .equal,
-                                                        toItem: self, attribute: .width, multiplier: 1, constant: 0)
+                                                     toItem: self, attribute: .width, multiplier: 1, constant: 0)
         addConstraint(selectionIndicatorW)
         
         let selectionIndicatorL = NSLayoutConstraint(item: defaultSelectionIndicator, attribute: .leading, relatedBy: .equal,
-                                                        toItem: self, attribute: .leading, multiplier: 1, constant: 0)
+                                                     toItem: self, attribute: .leading, multiplier: 1, constant: 0)
         addConstraint(selectionIndicatorL)
         
         selectionIndicatorB = NSLayoutConstraint(item: defaultSelectionIndicator, attribute: .bottom, relatedBy: .equal,
-                                                    toItem: self, attribute: .centerY, multiplier: 1, constant: (rowHeight / 2))
+                                                 toItem: self, attribute: .centerY, multiplier: 1, constant: (rowHeight / 2))
         addConstraint(selectionIndicatorB)
         
         let selectionIndicatorT = NSLayoutConstraint(item: defaultSelectionIndicator, attribute: .trailing, relatedBy: .equal,
-                                                        toItem: self, attribute: .trailing, multiplier: 1, constant: 0)
+                                                     toItem: self, attribute: .trailing, multiplier: 1, constant: 0)
         addConstraint(selectionIndicatorT)
     }
     
@@ -375,7 +376,7 @@ open class PickerView: UIView {
         if scrollingStyle == .default {
             return 1
         }
-
+        
         if numberOfRowsByDataSource > 100 {
             return 100
         } else if numberOfRowsByDataSource < 100 && numberOfRowsByDataSource > 50 {
@@ -394,7 +395,7 @@ open class PickerView: UIView {
         
         if let _ = newWindow {
             NotificationCenter.default.addObserver(self, selector: #selector(PickerView.adjustCurrentSelectedAfterOrientationChanges),
-                                                            name: UIDevice.orientationDidChangeNotification, object: nil)
+                                                   name: UIDevice.orientationDidChangeNotification, object: nil)
         } else {
             NotificationCenter.default.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
         }
@@ -422,9 +423,9 @@ open class PickerView: UIView {
         guard screenSize != UIScreen.main.bounds.size else {
             return
         }
-
+        
         screenSize = UIScreen.main.bounds.size
-
+        
         setNeedsLayout()
         layoutIfNeeded()
         
@@ -449,35 +450,36 @@ open class PickerView: UIView {
     // MARK: - Actions
     
     /**
-        Selects the nearby to middle row that matches with the provided index.
-    
-        - parameter row: A valid index provided by Data Source.
-    */
+     Selects the nearby to middle row that matches with the provided index.
+     
+     - parameter row: A valid index provided by Data Source.
+     */
     fileprivate func selectedNearbyToMiddleRow(_ row: Int) {
         currentSelectedRow = row
         tableView.reloadData()
-
+        
         // This line adjust the contentInset to UIEdgeInsetZero because when the PickerView are inside of a UIViewController
         // presented by a UINavigation controller, the tableView contentInset is affected.
         tableView.contentInset = UIEdgeInsets.zero
-
+        
         let indexOfSelectedRow = visibleIndexOfSelectedRow()
         tableView.setContentOffset(CGPoint(x: 0.0, y: CGFloat(indexOfSelectedRow) * rowHeight), animated: false)
-
+        wasScrolling = false
+        
         delegate?.pickerView?(self, didSelectRow: currentSelectedRow)
         shouldSelectNearbyToMiddleRow = false
     }
     
     /**
-        Selects literally the row with index that the user tapped.
-    
-        - parameter row: The row index that the user tapped, i.e. the Data Source index times the `infinityRowsMultiplier`.
-    */
+     Selects literally the row with index that the user tapped.
+     
+     - parameter row: The row index that the user tapped, i.e. the Data Source index times the `infinityRowsMultiplier`.
+     */
     fileprivate func selectTappedRow(_ row: Int) {
         delegate?.pickerView?(self, didTapRow: indexForRow(row))
         selectRow(row, animated: true)
     }
-
+    
     fileprivate func turnPickerViewOn() {
         tableView.isScrollEnabled = true
         setupSelectionViewsVisibility()
@@ -491,17 +493,17 @@ open class PickerView: UIView {
     }
     
     /**
-        This is an private helper that we use to reach the visible index of the current selected row. 
-        Because of we multiply the rows several times to create an Infinite Scrolling experience, the index of a visible selected row may
-        not be the same as the index provided on Data Source.
-    
-        - returns: The visible index of current selected row.
-    */
+     This is an private helper that we use to reach the visible index of the current selected row.
+     Because of we multiply the rows several times to create an Infinite Scrolling experience, the index of a visible selected row may
+     not be the same as the index provided on Data Source.
+     
+     - returns: The visible index of current selected row.
+     */
     fileprivate func visibleIndexOfSelectedRow() -> Int {
         let middleMultiplier = scrollingStyle == .infinite ? (infinityRowsMultiplier / 2) : infinityRowsMultiplier
         let middleIndex = numberOfRowsByDataSource * middleMultiplier
         let indexForSelectedRow: Int
-    
+        
         if let _ = currentSelectedRow , scrollingStyle == .default && currentSelectedRow == 0 {
             indexForSelectedRow = 0
         } else if let _ = currentSelectedRow {
@@ -543,7 +545,7 @@ extension PickerView: UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let numberOfRows = numberOfRowsByDataSource * infinityRowsMultiplier
-
+        
         // Select the nearby to middle row when it's needed (first run or orientation change)
         if shouldSelectNearbyToMiddleRow && numberOfRows > 0 {
             // Configure the PickerView to select the middle row when the orientation changes during scroll
@@ -555,14 +557,14 @@ extension PickerView: UITableViewDataSource {
                 selectedNearbyToMiddleRow(rowToSelect!)
             }
         }
-
+        
         // If PickerView have items to show set it as enabled otherwise set it as disabled
         if numberOfRows > 0 {
             turnPickerViewOn()
         } else {
             turnPickerViewOff()
         }
-
+        
         return numberOfRows
     }
     
@@ -599,6 +601,23 @@ extension PickerView: UITableViewDataSource {
         return pickerViewCell
     }
     
+    func setupWheeleEffect(cell:UITableViewCell) {
+        let visibleRect = CGRect(origin: tableView.contentOffset, size: tableView.frame.size)
+        
+        let percentFromCenter = min(((visibleRect.midY - cell.frame.midY) / (visibleRect.height / 2)), 1.0)
+        let scaleFactor = 1.0 - abs(percentFromCenter / 3)
+        let layer = cell.contentView.layer
+        //var rotationAndPerspectiveTransform:CATransform3D = CATransform3DIdentity
+        //rotationAndPerspectiveTransform.m34 = 1.0 / -1000;
+        
+        let maxRotation = CGFloat.pi / 2
+        let rotationAndPerspectiveTransform = CATransform3DRotate(CATransform3DIdentity,maxRotation * percentFromCenter, 1.0, 0.0, 0.0);
+        let scaleTransform = CATransform3DScale(CATransform3DIdentity,scaleFactor,scaleFactor,0.0)
+        let transform = CATransform3DConcat(rotationAndPerspectiveTransform, scaleTransform)
+        
+        layer.transform =  transform
+    }
+    
 }
 
 extension PickerView: UITableViewDelegate {
@@ -618,23 +637,14 @@ extension PickerView: UITableViewDelegate {
         } else if numberOfRowsInPickerView > 0 && (indexPath as NSIndexPath).row == numberOfRowsInPickerView - 1 {
             return (frame.height / 2) + (rowHeight / 2)
         }
-
+        
         return rowHeight
     }
     
     public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-//        let layer = cell.contentView.layer
-//        var rotationAndPerspectiveTransform:CATransform3D = CATransform3DIdentity
-//        rotationAndPerspectiveTransform.m34 = 1.0 / -1000;
-//
-//        rotationAndPerspectiveTransform = CATransform3DRotate(rotationAndPerspectiveTransform, -.pi*0.5, 1.0, 0.0, 0.0);
-//        //let scaleTransform = CATransform3DScale(CATransform3DIdentity, 0, 0, 0)
-//
-//        layer.transform =  rotationAndPerspectiveTransform
-//
-//        UIView.animate(withDuration: 3) {
-//            layer.transform = CATransform3DIdentity
-//        }
+        if !wasScrolling {
+            setupWheeleEffect(cell: cell)
+        }
     }
 }
 
@@ -673,8 +683,7 @@ extension PickerView: UIScrollViewDelegate {
     }
     
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let visibleRect = CGRect(origin: scrollView.contentOffset, size: scrollView.frame.size)
-        
+        wasScrolling = true
         let partialRow = Float(scrollView.contentOffset.y / rowHeight)
         let roundedRow = lroundf(partialRow)
         
@@ -695,19 +704,7 @@ extension PickerView: UIScrollViewDelegate {
             let _ = delegate?.pickerView?(self, styleForLabel: cellToHighlight.titleLabel, highlighted: true)
         }
         
-        tableView.visibleCells.forEach { (cell) in
-            let percentFromCenter = min(((visibleRect.midY - cell.frame.midY) / (visibleRect.height / 2)), 1.0)
-            
-            let layer = cell.contentView.layer
-            var rotationAndPerspectiveTransform:CATransform3D = CATransform3DIdentity
-            rotationAndPerspectiveTransform.m34 = 1.0 / -1000;
-            
-            let maxRotation = CGFloat.pi / 2
-            rotationAndPerspectiveTransform = CATransform3DRotate(rotationAndPerspectiveTransform,maxRotation * percentFromCenter, 1.0, 0.0, 0.0);
-            //let scaleTransform = CATransform3DScale(CATransform3DIdentity, 0, 0, 0)
-            
-            layer.transform =  rotationAndPerspectiveTransform
-        }
+        tableView.visibleCells.forEach({ setupWheeleEffect(cell: $0) })
     }
     
 }
